@@ -1,88 +1,81 @@
-// Firework particle animation (mo.js) — edge bursts
+// Firework particle animation (Motion One) — edge bursts
 const BURST_PALETTE = ['#e91e63', '#7c4dff', '#ff9800', '#4caf50', '#00bcd4', '#ffeb3b', '#ff5722'];
 const EDGE_BURST_COUNT = 6;
 
-// Pre-create reusable burst pools
-const edgeBursts = [];
-for (let i = 0; i < EDGE_BURST_COUNT; i++) {
-  edgeBursts.push({
-    outer: new mojs.Burst({
-      left: 0, top: 0,
-      radius:   { 0: 160 },
-      count:    8,
-      children: {
-        shape:    'circle',
-        fill:     BURST_PALETTE,
-        radius:   { 12: 0 },
-        scale:    { 1: 0 },
-        duration: 1500,
-        easing:   'expo.out',
-        opacity:  { 1: 0 },
-      }
-    }),
-    inner: new mojs.Burst({
-      left: 0, top: 0,
-      radius:   { 0: 90 },
-      count:    5,
-      children: {
-        shape:    'circle',
-        fill:     BURST_PALETTE,
-        radius:   { 10: 0 },
-        scale:    { 1: 0 },
-        duration: 1300,
-        easing:   'quad.out',
-      }
-    }),
-  });
-}
-
-function getEdgePoint(rect) {
-  // Pick a random point along the perimeter of the button
-  const perim = 2 * (rect.width + rect.height);
-  let d = Math.random() * perim;
-  if (d < rect.width) {
-    return { x: rect.left + d, y: rect.top };                    // top edge
-  }
-  d -= rect.width;
-  if (d < rect.height) {
-    return { x: rect.right, y: rect.top + d };                   // right edge
-  }
-  d -= rect.height;
-  if (d < rect.width) {
-    return { x: rect.right - d, y: rect.bottom };                // bottom edge
-  }
-  d -= rect.width;
-  return { x: rect.left, y: rect.top + (rect.height - d) };     // left edge
-}
-
-function spawnFirework(button) {
-  const rect = button.getBoundingClientRect();
-  // Account for body transform: scale(0.8) with transform-origin: top center
-  const scale = 0.8;
+function createParticleBurst(clickX, clickY) {
+  const { animate } = Motion;
+  
+  const scale = 0.8; 
   const centerX = window.innerWidth / 2;
-  
-  // Only set overflow: hidden on desktop, not on mobile
-  const isMobile = window.innerWidth <= 640;
-  if (!isMobile) {
-    document.body.style.overflow = 'hidden';
+  const adjustedX = (clickX - centerX) / scale + centerX;
+  const adjustedY = clickY / scale;
+
+  const particleCount = 28; // Slightly more for the bigger sizes
+
+  for (let i = 0; i < particleCount; i++) {
+    const particle = document.createElement('div');
+    const color = BURST_PALETTE[Math.floor(Math.random() * BURST_PALETTE.length)];
+    
+    // BIGGER PARTICLES: Increased range from 12px to 24px
+    const size = Math.random() * 12 + 12; 
+    
+    particle.style.cssText = `
+      position: absolute;
+      left: ${adjustedX}px;
+      top: ${adjustedY}px;
+      width: ${size}px;
+      height: ${size}px;
+      background: ${color};
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px ${color}88; /* Added a soft glow */
+    `;
+
+    document.body.appendChild(particle);
+
+    const angle = (i / particleCount) * Math.PI * 2 + (Math.random() * 0.5);
+    const distance = 140 + Math.random() * 120;
+    
+    // GRAVITY LOGIC:
+    // moveX is standard outward force
+    const moveX = Math.cos(angle) * distance;
+    // moveY includes the outward force PLUS a downward "gravity" pull (e.g., +100px)
+    const gravity = 100; 
+    const moveY = (Math.sin(angle) * distance) + gravity;
+
+    animate(
+      particle,
+      {
+        transform: [
+            `translate(-50%, -50%) translate(0px, 0px) scale(1)`,
+            `translate(-50%, -50%) translate(${moveX}px, ${moveY}px) scale(0.1)`
+        ],
+        opacity: [1, 0]
+      },
+      {
+        duration: 2.2 + Math.random() * 0.6, // Even slower for a heavy, floaty feel
+        easing: "cubic-bezier(0.1, 0.8, 0.3, 1)" // Smooth deceleration
+      }
+    ).finished.then(() => particle.remove());
   }
+}
+
+function spawnFirework(event) {
+  // If no event is passed (e.g. triggered via code), we can't get coords
+  if (!event) return;
+
+  // clientX/Y get the exact mouse position regardless of page scaling
+  const x = event.clientX;
+  const y = event.clientY;
   
-  const totalDuration = (EDGE_BURST_COUNT - 1) * 100 + 1500;
-  for (let i = 0; i < EDGE_BURST_COUNT; i++) {
-    const pt = getEdgePoint(rect);
-    // Convert viewport coords to body-local coords
-    const bx = (pt.x - centerX) / scale + centerX;
-    const by = pt.y / scale;
-    const b = edgeBursts[i];
-    setTimeout(() => {
-      b.outer.tune({ x: bx, y: by }).generate().replay();
-      b.inner.tune({ x: bx, y: by }).generate().replay();
-    }, i * 100);
-  }
-  
-  if (!isMobile) {
-    setTimeout(() => { document.body.style.overflow = ''; }, totalDuration);
-  }
+  let bursts = 0;
+  const interval = setInterval(() => {
+    createParticleBurst(x, y);
+    bursts++;
+    if (bursts >= 3) clearInterval(interval);
+  }, 100);
 }
 
 // Asset data
@@ -482,7 +475,7 @@ function createAssetRow(type, tierIdx) {
     });
   });
 
-  gotBtn.addEventListener('click', () => {
+  gotBtn.addEventListener('click', (e) => {
     if (skipArr[tierIdx]) return;
     if (obtained && !isTierLocked(tierIdx)) {
       // Undo — only if the tier hasn't been fully resolved
@@ -492,7 +485,7 @@ function createAssetRow(type, tierIdx) {
       saveState();
     } else if (!obtained) {
       gotArr[tierIdx] = true;
-      spawnFirework(gotBtn);
+      spawnFirework(e);
       refreshRow(type, tierIdx);
       // Also refresh the other side so it picks up locked state
       refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);

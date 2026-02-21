@@ -6,10 +6,6 @@
   box-sizing: border-box;
 }
 
-html, body {
-  overflow: hidden;
-}
-
 body {
   font-family: 'Sniglet', sans-serif;
   background: linear-gradient(135deg, #fce4ec 0%, #e8eaf6 50%, #e0f7fa 100%);
@@ -18,6 +14,14 @@ body {
   transform: scale(0.8);
   transform-origin: top center;
   min-height: 125vh;
+}
+
+/* Mobile: remove scale transform to allow proper scrolling */
+@media (max-width: 640px) {
+  body {
+    transform: scale(1);
+    min-height: 100vh;
+  }
 }
 
 /* ===== ONBOARDING ===== */
