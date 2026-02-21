@@ -308,7 +308,7 @@ body {
 .asset-counter {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   flex-shrink: 0;
   margin-left: 10px;
 }
@@ -326,6 +326,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.counter-btn.minus-3,
+.counter-btn.plus-3,
+.counter-btn.minus-10,
+.counter-btn.plus-10 {
+  width: 34px;
+  height: 34px;
+  font-size: 0.85rem;
+  border-radius: 10px;
 }
 
 .counter-btn:active {

@@ -266,11 +266,15 @@ function createAssetRow(type, tierIdx) {
       </div>
     </div>
     <div class="asset-counter">
-      <button class="counter-btn minus" data-type="${type}" data-tier="${tierIdx}" ${count <= 0 || resolved ? 'disabled' : ''}>-</button>
+      <button class="counter-btn minus minus-10" data-type="${type}" data-tier="${tierIdx}" data-amount="10" ${count < 10 || resolved ? 'disabled' : ''}>-10</button>
+      <button class="counter-btn minus minus-3" data-type="${type}" data-tier="${tierIdx}" data-amount="3" ${count < 3 || resolved ? 'disabled' : ''}>-3</button>
+      <button class="counter-btn minus minus-1" data-type="${type}" data-tier="${tierIdx}" data-amount="1" ${count <= 0 || resolved ? 'disabled' : ''}>-</button>
       <div class="count-display">
         ${count}<br><span class="of-total">/ ${guarantee}</span>
       </div>
-      <button class="counter-btn plus" data-type="${type}" data-tier="${tierIdx}" ${resolved ? 'disabled' : ''}>+</button>
+      <button class="counter-btn plus plus-1" data-type="${type}" data-tier="${tierIdx}" data-amount="1" ${resolved || count + 1 > guarantee ? 'disabled' : ''}>+</button>
+      <button class="counter-btn plus plus-3" data-type="${type}" data-tier="${tierIdx}" data-amount="3" ${resolved || count + 3 > guarantee ? 'disabled' : ''}>+3</button>
+      <button class="counter-btn plus plus-10" data-type="${type}" data-tier="${tierIdx}" data-amount="10" ${resolved || count + 10 > guarantee ? 'disabled' : ''}>+10</button>
     </div>
     <button class="got-btn ${obtained ? 'obtained' : ''} ${obtained && locked ? 'locked' : ''}" ${skipped ? 'style="display:none"' : ''}>
       <span class="got-icon">&#10003;</span>
@@ -283,29 +287,34 @@ function createAssetRow(type, tierIdx) {
   `;
 
   // Bind events
-  const minusBtn = row.querySelector('.counter-btn.minus');
-  const plusBtn = row.querySelector('.counter-btn.plus');
   const gotBtn = row.querySelector('.got-btn');
   const skipBtn = row.querySelector('.skip-btn');
 
-  minusBtn.addEventListener('click', () => {
-    if (counts[tierIdx] > 0 && !gotArr[tierIdx] && !skipArr[tierIdx]) {
-      counts[tierIdx]--;
-      currentGoldSpent -= GOLD_PER_GIFT;
-      refreshRow(type, tierIdx);
-      updateGold();
-      saveState();
-    }
+  row.querySelectorAll('.counter-btn.minus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const amount = parseInt(btn.dataset.amount);
+      if (counts[tierIdx] > 0 && !gotArr[tierIdx] && !skipArr[tierIdx]) {
+        const actual = Math.min(amount, counts[tierIdx]);
+        counts[tierIdx] -= actual;
+        currentGoldSpent -= GOLD_PER_GIFT * actual;
+        refreshRow(type, tierIdx);
+        updateGold();
+        saveState();
+      }
+    });
   });
 
-  plusBtn.addEventListener('click', () => {
-    if (!gotArr[tierIdx] && !skipArr[tierIdx]) {
-      counts[tierIdx]++;
-      currentGoldSpent += GOLD_PER_GIFT;
-      refreshRow(type, tierIdx);
-      updateGold();
-      saveState();
-    }
+  row.querySelectorAll('.counter-btn.plus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const amount = parseInt(btn.dataset.amount);
+      if (!gotArr[tierIdx] && !skipArr[tierIdx]) {
+        counts[tierIdx] += amount;
+        currentGoldSpent += GOLD_PER_GIFT * amount;
+        refreshRow(type, tierIdx);
+        updateGold();
+        saveState();
+      }
+    });
   });
 
   gotBtn.addEventListener('click', () => {
