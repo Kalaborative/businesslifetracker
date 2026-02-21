@@ -30,6 +30,8 @@ let wolfCounts = [];
 let totalGoldMax = 0;
 let currentGoldSpent = 0; // total gifts sent * 300
 let showAllAssets = false;
+let inputCurrentLevel = 0;
+let inputGoalLevel = 0;
 let catGot = [];     // boolean per tier — true if asset obtained
 let wolfGot = [];    // boolean per tier — true if asset obtained
 let catSkipped = []; // boolean per tier — true if asset skipped
@@ -153,6 +155,8 @@ function onStart() {
 
   startTierIndex = fromIdx;
   goalTierIndex = toIdx;
+  inputCurrentLevel = curLevel;
+  inputGoalLevel = goalLevel;
   totalGoldMax = calcMaxGold(startTierIndex, goalTierIndex);
   catCounts = new Array(tiers.length).fill(0);
   wolfCounts = new Array(tiers.length).fill(0);
@@ -180,9 +184,7 @@ function showTracker() {
   onboarding.style.display = 'none';
   tracker.style.display = 'block';
 
-  const minLvl = tiers[startTierIndex].levels.split('~')[0];
-  const maxLvl = tiers[goalTierIndex].levels.split('~')[1];
-  trackerTitle.textContent = `Tracking Level ${minLvl} to ${maxLvl}`;
+  trackerTitle.textContent = `Tracking Level ${inputCurrentLevel} to ${inputGoalLevel}`;
 
   renderAssets();
   updateGold();
@@ -310,6 +312,10 @@ function createAssetRow(type, tierIdx) {
       if (!gotArr[tierIdx] && !skipArr[tierIdx]) {
         counts[tierIdx] += amount;
         currentGoldSpent += GOLD_PER_GIFT * amount;
+        if (counts[tierIdx] >= guarantee) {
+          gotArr[tierIdx] = true;
+          refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
+        }
         refreshRow(type, tierIdx);
         updateGold();
         saveState();
@@ -370,6 +376,8 @@ function saveState() {
   const state = {
     startTierIndex,
     goalTierIndex,
+    inputCurrentLevel,
+    inputGoalLevel,
     catCounts,
     wolfCounts,
     catGot,
@@ -389,6 +397,8 @@ function loadState() {
     const state = JSON.parse(raw);
     startTierIndex = state.startTierIndex ?? 0;
     goalTierIndex = state.goalTierIndex;
+    inputCurrentLevel = state.inputCurrentLevel ?? parseInt(tiers[startTierIndex].levels.split('~')[0]);
+    inputGoalLevel = state.inputGoalLevel ?? parseInt(tiers[goalTierIndex].levels.split('~')[1]);
     catCounts = state.catCounts;
     wolfCounts = state.wolfCounts;
     catGot = state.catGot ?? new Array(tiers.length).fill(false);
@@ -397,8 +407,8 @@ function loadState() {
     wolfSkipped = state.wolfSkipped ?? new Array(tiers.length).fill(false);
     totalGoldMax = state.totalGoldMax;
     currentGoldSpent = state.currentGoldSpent;
-    currentLevelInput.value = parseInt(tiers[startTierIndex].levels.split('~')[0]);
-    goalSelect.value = parseInt(tiers[goalTierIndex].levels.split('~')[1]);
+    currentLevelInput.value = inputCurrentLevel;
+    goalSelect.value = inputGoalLevel;
     onLevelChange();
     showTracker();
   } catch (e) {
