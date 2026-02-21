@@ -108,6 +108,7 @@ let catGot = [];     // boolean per tier — true if asset obtained
 let wolfGot = [];    // boolean per tier — true if asset obtained
 let catSkipped = []; // boolean per tier — true if asset skipped
 let wolfSkipped = [];
+let goldRushActive = false;
 
 // Elements
 const currentLevelInput = document.getElementById('currentLevel');
@@ -123,6 +124,7 @@ const catAssetsEl = document.getElementById('catAssets');
 const wolfAssetsEl = document.getElementById('wolfAssets');
 
 const toggleViewBtn = document.getElementById('toggleViewBtn');
+const goldRushBtn = document.getElementById('goldRushBtn');
 const currentLevelHint = document.getElementById('currentLevelHint');
 const levelHint = document.getElementById('levelHint');
 
@@ -143,9 +145,20 @@ function init() {
   startBtn.addEventListener('click', onStart);
   backBtn.addEventListener('click', onBack);
   toggleViewBtn.addEventListener('click', onToggleView);
+  goldRushBtn.addEventListener('click', onGoldRushToggle);
 
   // Try to load saved state
   loadState();
+}
+
+function onGoldRushToggle() {
+  goldRushActive = !goldRushActive;
+  goldRushBtn.classList.toggle('active', goldRushActive);
+  goldRushBtn.textContent = goldRushActive ? 'Gold Rush ON' : 'Gold Rush';
+  // Re-render assets to show updated probabilities
+  if (startTierIndex !== -1 && goalTierIndex !== -1) {
+    renderAssets();
+  }
 }
 
 function calcMaxGold(fromTier, toTier) {
@@ -322,9 +335,13 @@ function createAssetRow(type, tierIdx) {
   const locked = isTierLocked(tierIdx);
 
   const experimentalProb = ((count / guarantee) * 100).toFixed(2);
+  
+  // Calculate theoretical probability with Gold Rush bonus (20% increase)
+  const goldRushMultiplier = goldRushActive ? 1.2 : 1;
+  const displayProbability = (tier.probability * goldRushMultiplier).toFixed(2);
 
   const row = document.createElement('div');
-  row.className = 'asset-row' + (obtained ? ' completed' : '') + (skipped ? ' skipped' : '');
+  row.className = 'asset-row' + (obtained ? ' completed' : '') + (skipped ? ' skipped' : '') + (goldRushActive ? ' gold-rush' : '');
   row.id = `row-${type}-${tierIdx}`;
 
   row.innerHTML = `
@@ -332,7 +349,7 @@ function createAssetRow(type, tierIdx) {
       <div class="asset-name">${itemName}</div>
       <div class="asset-level">Lv. ${tier.levels}</div>
       <div class="asset-prob">
-        Theoretical: ${tier.probability}% &nbsp;|&nbsp;
+        Theoretical: ${displayProbability}% ${goldRushActive ? '<span class="gold-rush-badge">+20%</span>' : ''} &nbsp;|&nbsp;
         Experimental: <span class="exp-prob">${experimentalProb}%</span>
       </div>
       <div class="progress-bar-wrap">
