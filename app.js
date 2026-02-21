@@ -57,14 +57,20 @@ function getEdgePoint(rect) {
 
 function spawnFirework(button) {
   const rect = button.getBoundingClientRect();
+  // Account for body transform: scale(0.8) with transform-origin: top center
+  const scale = 0.8;
+  const centerX = window.innerWidth / 2;
   document.body.style.overflow = 'hidden';
   const totalDuration = (EDGE_BURST_COUNT - 1) * 100 + 1500;
   for (let i = 0; i < EDGE_BURST_COUNT; i++) {
     const pt = getEdgePoint(rect);
+    // Convert viewport coords to body-local coords
+    const bx = (pt.x - centerX) / scale + centerX;
+    const by = pt.y / scale;
     const b = edgeBursts[i];
     setTimeout(() => {
-      b.outer.tune({ x: pt.x, y: pt.y }).generate().replay();
-      b.inner.tune({ x: pt.x, y: pt.y }).generate().replay();
+      b.outer.tune({ x: bx, y: by }).generate().replay();
+      b.inner.tune({ x: bx, y: by }).generate().replay();
     }, i * 100);
   }
   setTimeout(() => { document.body.style.overflow = ''; }, totalDuration);
