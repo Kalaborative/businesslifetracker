@@ -1,3 +1,75 @@
+// Firework particle animation (mo.js) — edge bursts
+const BURST_PALETTE = ['#e91e63', '#7c4dff', '#ff9800', '#4caf50', '#00bcd4', '#ffeb3b', '#ff5722'];
+const EDGE_BURST_COUNT = 6;
+
+// Pre-create reusable burst pools
+const edgeBursts = [];
+for (let i = 0; i < EDGE_BURST_COUNT; i++) {
+  edgeBursts.push({
+    outer: new mojs.Burst({
+      left: 0, top: 0,
+      radius:   { 0: 160 },
+      count:    8,
+      children: {
+        shape:    'circle',
+        fill:     BURST_PALETTE,
+        radius:   { 12: 0 },
+        scale:    { 1: 0 },
+        duration: 1500,
+        easing:   'expo.out',
+        opacity:  { 1: 0 },
+      }
+    }),
+    inner: new mojs.Burst({
+      left: 0, top: 0,
+      radius:   { 0: 90 },
+      count:    5,
+      children: {
+        shape:    'circle',
+        fill:     BURST_PALETTE,
+        radius:   { 10: 0 },
+        scale:    { 1: 0 },
+        duration: 1300,
+        easing:   'quad.out',
+      }
+    }),
+  });
+}
+
+function getEdgePoint(rect) {
+  // Pick a random point along the perimeter of the button
+  const perim = 2 * (rect.width + rect.height);
+  let d = Math.random() * perim;
+  if (d < rect.width) {
+    return { x: rect.left + d, y: rect.top };                    // top edge
+  }
+  d -= rect.width;
+  if (d < rect.height) {
+    return { x: rect.right, y: rect.top + d };                   // right edge
+  }
+  d -= rect.height;
+  if (d < rect.width) {
+    return { x: rect.right - d, y: rect.bottom };                // bottom edge
+  }
+  d -= rect.width;
+  return { x: rect.left, y: rect.top + (rect.height - d) };     // left edge
+}
+
+function spawnFirework(button) {
+  const rect = button.getBoundingClientRect();
+  document.body.style.overflow = 'hidden';
+  const totalDuration = (EDGE_BURST_COUNT - 1) * 100 + 1500;
+  for (let i = 0; i < EDGE_BURST_COUNT; i++) {
+    const pt = getEdgePoint(rect);
+    const b = edgeBursts[i];
+    setTimeout(() => {
+      b.outer.tune({ x: pt.x, y: pt.y }).generate().replay();
+      b.inner.tune({ x: pt.x, y: pt.y }).generate().replay();
+    }, i * 100);
+  }
+  setTimeout(() => { document.body.style.overflow = ''; }, totalDuration);
+}
+
 // Asset data
 const tiers = [
   { levels: "1~3",   guarantee: 5,    probability: 50.00,  catItem: "Skateboard",         wolfItem: "Ticket Stubs" },
@@ -314,6 +386,7 @@ function createAssetRow(type, tierIdx) {
         currentGoldSpent += GOLD_PER_GIFT * amount;
         if (counts[tierIdx] >= guarantee) {
           gotArr[tierIdx] = true;
+          spawnFirework(row.querySelector('.got-btn'));
           refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
         }
         refreshRow(type, tierIdx);
@@ -332,6 +405,7 @@ function createAssetRow(type, tierIdx) {
       saveState();
     } else if (!obtained) {
       gotArr[tierIdx] = true;
+      spawnFirework(gotBtn);
       refreshRow(type, tierIdx);
       // Also refresh the other side so it picks up locked state
       refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
