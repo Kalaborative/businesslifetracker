@@ -60,7 +60,13 @@ function spawnFirework(button) {
   // Account for body transform: scale(0.8) with transform-origin: top center
   const scale = 0.8;
   const centerX = window.innerWidth / 2;
-  document.body.style.overflow = 'hidden';
+  
+  // Only set overflow: hidden on desktop, not on mobile
+  const isMobile = window.innerWidth <= 640;
+  if (!isMobile) {
+    document.body.style.overflow = 'hidden';
+  }
+  
   const totalDuration = (EDGE_BURST_COUNT - 1) * 100 + 1500;
   for (let i = 0; i < EDGE_BURST_COUNT; i++) {
     const pt = getEdgePoint(rect);
@@ -73,7 +79,10 @@ function spawnFirework(button) {
       b.inner.tune({ x: bx, y: by }).generate().replay();
     }, i * 100);
   }
-  setTimeout(() => { document.body.style.overflow = ''; }, totalDuration);
+  
+  if (!isMobile) {
+    setTimeout(() => { document.body.style.overflow = ''; }, totalDuration);
+  }
 }
 
 // Asset data
