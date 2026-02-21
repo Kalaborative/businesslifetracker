@@ -72,24 +72,24 @@ function spawnFirework(button) {
 
 // Asset data
 const tiers = [
-  { levels: "1~3",   guarantee: 5,    probability: 50.00,  catItem: "Skateboard",         wolfItem: "Ticket Stubs" },
-  { levels: "4~6",   guarantee: 10,   probability: 50.00,  catItem: "Bike",               wolfItem: "Lighter" },
-  { levels: "7~9",   guarantee: 20,   probability: 10.00,  catItem: "Road Bike",          wolfItem: "Cups" },
-  { levels: "10~12", guarantee: 25,   probability: 9.00,   catItem: "E-Bike",             wolfItem: "Jade Pot" },
-  { levels: "13~15", guarantee: 40,   probability: 5.00,   catItem: "E-Motorcycle",       wolfItem: "Cellared Red Wine" },
-  { levels: "16~18", guarantee: 80,   probability: 3.50,   catItem: "Motorcycle",         wolfItem: "Vintage Camera" },
-  { levels: "19~21", guarantee: 120,  probability: 2.30,   catItem: "Racing-Motorcycle",  wolfItem: "Vintage Typewriter" },
-  { levels: "22~24", guarantee: 150,  probability: 1.80,   catItem: "Sedan",              wolfItem: "Phonograph" },
-  { levels: "25~27", guarantee: 180,  probability: 1.50,   catItem: "Convertible",        wolfItem: "Royal Badge (Silver)" },
-  { levels: "28~30", guarantee: 210,  probability: 1.20,   catItem: "Racing Car",         wolfItem: "Royal Badge (Gold)" },
-  { levels: "31~33", guarantee: 250,  probability: 0.70,   catItem: "Balloon Yacht",      wolfItem: "Silver Scale" },
-  { levels: "34~36", guarantee: 290,  probability: 0.60,   catItem: "Ship",               wolfItem: "Gilded Clock" },
-  { levels: "37~39", guarantee: 330,  probability: 0.40,   catItem: "Sea Train",          wolfItem: "Beethoven Manuscript" },
-  { levels: "40~42", guarantee: 370,  probability: 0.35,   catItem: "Private Jet",        wolfItem: "Famous Painting" },
-  { levels: "43~45", guarantee: 420,  probability: 0.30,   catItem: "Fight Aircraft",     wolfItem: "Royal Harp" },
-  { levels: "46~48", guarantee: 470,  probability: 0.27,   catItem: "Fantasy Airship",    wolfItem: "Royal Piano" },
-  { levels: "49~51", guarantee: 800,  probability: 0.20,   catItem: "Rocket",             wolfItem: "Crown" },
-  { levels: "52~54", guarantee: 1200, probability: 0.15,   catItem: "UFO",                wolfItem: "Alien Civilization Relic" },
+  { levels: "1~3",   guarantee: 5,    probability: 50.00,  catItem: "Skateboard",         wolfItem: "Ticket Stubs",        netWorthPercent: 1 },
+  { levels: "4~6",   guarantee: 10,   probability: 50.00,  catItem: "Bike",               wolfItem: "Lighter",             netWorthPercent: 2 },
+  { levels: "7~9",   guarantee: 20,   probability: 10.00,  catItem: "Road Bike",          wolfItem: "Cups",                netWorthPercent: 3 },
+  { levels: "10~12", guarantee: 25,   probability: 9.00,   catItem: "E-Bike",             wolfItem: "Jade Pot",            netWorthPercent: 4 },
+  { levels: "13~15", guarantee: 40,   probability: 5.00,   catItem: "E-Motorcycle",       wolfItem: "Cellared Red Wine",   netWorthPercent: 5 },
+  { levels: "16~18", guarantee: 80,   probability: 3.50,  catItem: "Motorcycle",         wolfItem: "Vintage Camera",      netWorthPercent: 5 },
+  { levels: "19~21", guarantee: 120,  probability: 2.30,  catItem: "Racing-Motorcycle",  wolfItem: "Vintage Typewriter",  netWorthPercent: 5 },
+  { levels: "22~24", guarantee: 150,  probability: 1.80,  catItem: "Sedan",              wolfItem: "Phonograph",          netWorthPercent: 5 },
+  { levels: "25~27", guarantee: 180,  probability: 1.50,  catItem: "Convertible",        wolfItem: "Royal Badge (Silver)",netWorthPercent: 6 },
+  { levels: "28~30", guarantee: 210,  probability: 1.20,  catItem: "Racing Car",         wolfItem: "Royal Badge (Gold)",   netWorthPercent: 6 },
+  { levels: "31~33", guarantee: 250,  probability: 0.70,  catItem: "Balloon Yacht",      wolfItem: "Silver Scale",        netWorthPercent: 6 },
+  { levels: "34~36", guarantee: 290,  probability: 0.60,  catItem: "Ship",               wolfItem: "Gilded Clock",        netWorthPercent: 6 },
+  { levels: "37~39", guarantee: 330,  probability: 0.40,  catItem: "Sea Train",          wolfItem: "Beethoven Manuscript",netWorthPercent: 7 },
+  { levels: "40~42", guarantee: 370,  probability: 0.35,  catItem: "Private Jet",        wolfItem: "Famous Painting",     netWorthPercent: 7 },
+  { levels: "43~45", guarantee: 420,  probability: 0.30,  catItem: "Fight Aircraft",     wolfItem: "Royal Harp",           netWorthPercent: 8 },
+  { levels: "46~48", guarantee: 470,  probability: 0.27,  catItem: "Fantasy Airship",    wolfItem: "Royal Piano",         netWorthPercent: 8 },
+  { levels: "49~51", guarantee: 800,  probability: 0.20,  catItem: "Rocket",             wolfItem: "Crown",               netWorthPercent: 9 },
+  { levels: "52~54", guarantee: 1200, probability: 0.15,  catItem: "UFO",                wolfItem: "Alien Civilization Relic",netWorthPercent: 10 },
 ];
 
 const GOLD_PER_GIFT = 300;
@@ -127,6 +127,7 @@ const toggleViewBtn = document.getElementById('toggleViewBtn');
 const goldRushBtn = document.getElementById('goldRushBtn');
 const currentLevelHint = document.getElementById('currentLevelHint');
 const levelHint = document.getElementById('levelHint');
+const netWorthIncreaseEl = document.getElementById('netWorthIncrease');
 
 // Find which tier index a given level falls into
 function getTierIndex(level) {
@@ -273,6 +274,7 @@ function showTracker() {
 
   renderAssets();
   updateGold();
+  updateNetWorth();
 }
 
 function getCurrentTier() {
@@ -440,6 +442,7 @@ function createAssetRow(type, tierIdx) {
         currentGoldSpent -= GOLD_PER_GIFT * actual;
         refreshRow(type, tierIdx);
         updateGold();
+        updateNetWorth();
         saveState();
       }
     });
@@ -458,6 +461,7 @@ function createAssetRow(type, tierIdx) {
         }
         refreshRow(type, tierIdx);
         updateGold();
+        updateNetWorth();
         saveState();
       }
     });
@@ -469,6 +473,7 @@ function createAssetRow(type, tierIdx) {
       // Undo — only if the tier hasn't been fully resolved
       gotArr[tierIdx] = false;
       refreshRow(type, tierIdx);
+      updateNetWorth();
       saveState();
     } else if (!obtained) {
       gotArr[tierIdx] = true;
@@ -476,6 +481,7 @@ function createAssetRow(type, tierIdx) {
       refreshRow(type, tierIdx);
       // Also refresh the other side so it picks up locked state
       refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
+      updateNetWorth();
       saveState();
     }
   });
@@ -486,12 +492,14 @@ function createAssetRow(type, tierIdx) {
       // Undo
       skipArr[tierIdx] = false;
       refreshRow(type, tierIdx);
+      updateNetWorth();
       saveState();
     } else if (!skipped) {
       skipArr[tierIdx] = true;
       refreshRow(type, tierIdx);
       // Also refresh the other side so it picks up locked state
       refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
+      updateNetWorth();
       saveState();
     }
   });
@@ -510,6 +518,27 @@ function refreshRow(type, tierIdx) {
 function updateGold() {
   const remaining = totalGoldMax - currentGoldSpent;
   goldRemainingEl.innerHTML = '<span class="coin">&#x1FA99;</span> ' + remaining.toLocaleString() + ' Gold';
+}
+
+function updateNetWorth() {
+  let totalNetWorth = 0;
+  
+  // Calculate net worth for each tier where assets are obtained
+  for (let i = startTierIndex; i <= goalTierIndex; i++) {
+    const catObtained = catGot[i];
+    const wolfObtained = wolfGot[i];
+    const netWorthPercent = tiers[i].netWorthPercent;
+    
+    // Add percentage for each obtained asset (cat and wolf)
+    if (catObtained) {
+      totalNetWorth += netWorthPercent;
+    }
+    if (wolfObtained) {
+      totalNetWorth += netWorthPercent;
+    }
+  }
+  
+  netWorthIncreaseEl.textContent = '+' + totalNetWorth + '%';
 }
 
 // Persistence
