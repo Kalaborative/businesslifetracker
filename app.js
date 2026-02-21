@@ -293,15 +293,65 @@ function onToggleView() {
   applyVisibility();
 }
 
+let previousActiveTier = -1;
+
 function applyVisibility() {
   const activeTier = getCurrentTier();
+  
+  // Detect tier transition
+  const tierChanged = previousActiveTier !== -1 && previousActiveTier !== activeTier;
+  
   for (let i = startTierIndex; i <= goalTierIndex; i++) {
     const catRow = document.getElementById(`row-cat-${i}`);
     const wolfRow = document.getElementById(`row-wolf-${i}`);
     const visible = showAllAssets || i === activeTier;
-    if (catRow) catRow.classList.toggle('hidden-row', !visible);
-    if (wolfRow) wolfRow.classList.toggle('hidden-row', !visible);
+    
+    if (catRow && wolfRow) {
+      const wasVisible = !catRow.classList.contains('hidden-row');
+      
+      if (visible) {
+        catRow.classList.remove('hidden-row', 'exiting');
+        wolfRow.classList.remove('hidden-row', 'exiting');
+        
+        // Add entering animation when transitioning to a new tier
+        if (tierChanged && i === activeTier) {
+          catRow.classList.add('entering');
+          wolfRow.classList.add('entering');
+          
+          // Add pulse highlight after entering animation completes
+          setTimeout(() => {
+            catRow.classList.remove('entering');
+            wolfRow.classList.remove('entering');
+            catRow.classList.add('current-tier');
+            wolfRow.classList.add('current-tier');
+            
+            // Remove pulse class after animation
+            setTimeout(() => {
+              catRow.classList.remove('current-tier');
+              wolfRow.classList.remove('current-tier');
+            }, 600);
+          }, 500);
+        }
+      } else if (wasVisible && tierChanged) {
+        // Add exiting animation when hiding previous tier
+        catRow.classList.add('exiting');
+        wolfRow.classList.add('exiting');
+        
+        // Hide after animation completes
+        setTimeout(() => {
+          catRow.classList.add('hidden-row');
+          catRow.classList.remove('exiting');
+          wolfRow.classList.add('hidden-row');
+          wolfRow.classList.remove('exiting');
+        }, 400);
+      } else if (!visible) {
+        catRow.classList.add('hidden-row');
+        wolfRow.classList.add('hidden-row');
+      }
+    }
   }
+  
+  previousActiveTier = activeTier;
 }
 
 function renderAssets() {
