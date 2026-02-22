@@ -480,15 +480,23 @@ function createAssetRow(type, tierIdx) {
     if (obtained && !isTierLocked(tierIdx)) {
       // Undo — only if the tier hasn't been fully resolved
       gotArr[tierIdx] = false;
+      // Add gold back (gifts not yet sent)
+      const remaining = guarantee - count;
+      currentGoldSpent -= remaining * GOLD_PER_GIFT;
       refreshRow(type, tierIdx);
+      updateGold();
       updateNetWorth();
       saveState();
     } else if (!obtained) {
       gotArr[tierIdx] = true;
+      // Subtract remaining gold (gifts not yet sent)
+      const remaining = guarantee - count;
+      currentGoldSpent += remaining * GOLD_PER_GIFT;
       spawnFirework(e);
       refreshRow(type, tierIdx);
       // Also refresh the other side so it picks up locked state
       refreshRow(type === 'cat' ? 'wolf' : 'cat', tierIdx);
+      updateGold();
       updateNetWorth();
       saveState();
     }
