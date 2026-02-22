@@ -525,7 +525,7 @@ function refreshRow(type, tierIdx) {
 
 function updateGold() {
   const remaining = totalGoldMax - currentGoldSpent;
-  goldRemainingEl.innerHTML = '<span class="coin">&#x1FA99;</span> ' + remaining.toLocaleString() + ' Gold';
+  goldRemainingEl.innerHTML = '<img src="coin-2159.svg" class="coin-icon" alt="Gold coin"> ' + remaining.toLocaleString() + ' Gold';
 }
 
 function updateNetWorth() {
