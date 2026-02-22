@@ -195,9 +195,13 @@ body {
   color: #e65100;
 }
 
-.gold-banner .gold-remaining .coin {
-  font-size: 1.6rem;
+.gold-banner .gold-remaining .coin-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
   vertical-align: middle;
+  margin-right: 6px;
+  color: #e65100;
 }
 
 /* ===== NET WORTH INCREASE ===== */
@@ -399,6 +403,46 @@ body {
   gap: 4px;
   flex-shrink: 0;
   margin-left: 10px;
+}
+
+@media (max-width: 640px) {
+  .asset-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .asset-info {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .asset-counter {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .count-display {
+    min-width: 36px;
+    font-size: 1rem;
+  }
+
+  .counter-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1.1rem;
+  }
+
+  .counter-btn.minus-3,
+  .counter-btn.plus-3,
+  .counter-btn.minus-10,
+  .counter-btn.plus-10 {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
 }
 
 .counter-btn {
